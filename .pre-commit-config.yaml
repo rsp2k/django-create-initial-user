@@ -33,7 +33,7 @@ repos:
         exclude: migrations/
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
         args: ["--profile", "black", "--line-length=88"]
@@ -65,12 +65,6 @@ repos:
         args: [-r, create_initial_superuser, --skip, B101]
         types: [python]
         exclude: tests/
-
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: 3.13.0
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
 
   # Additional Python-specific hooks
   - repo: https://github.com/asottile/pyupgrade

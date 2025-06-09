@@ -52,7 +52,7 @@ python manage.py createsuperuser
 ```python
 # settings.py - One time setup
 if DEBUG:
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -73,7 +73,7 @@ if DEBUG:
 |:---:|:---:|:---:|:---:|
 | Only creates superuser when none exist | DEBUG-mode only by default | Works out of the box | 100% test coverage |
 | Auto-detects email usernames | Proper password hashing | No database changes | Supports Django 3.2-5.0 |
-| Transparent warning system | Production-safe defaults | Type-hinted codebase | Python 3.8-3.12 ready |
+| Transparent warning system | Production-safe defaults | Type-hinted codebase | Python 3.9-3.12 ready |
 
 </div>
 
@@ -116,7 +116,7 @@ AUTHENTICATION_BACKENDS = [
 
 # 🔥 The magic happens here!
 if DEBUG:
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -127,7 +127,7 @@ if DEBUG:
 <summary><b>🎉 Usage</b></summary>
 
 1. **Start your Django project** normally
-2. **Navigate to `/admin/`** 
+2. **Navigate to `/admin/`**
 3. **Login with ANY credentials** you want for your superuser
 4. **✨ BOOM!** You're now logged in as a superuser!
 
@@ -282,7 +282,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Only enable in development
 if DEBUG or os.getenv('ENABLE_INITIAL_SUPERUSER'):
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -290,7 +290,6 @@ if DEBUG or os.getenv('ENABLE_INITIAL_SUPERUSER'):
 ### Docker Compose Integration
 ```yaml
 # docker-compose.yml
-version: '3.8'
 services:
   web:
     build: .
@@ -308,7 +307,7 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    
+
 # The backend automatically works with any user model! 🎉
 ```
 
@@ -354,15 +353,13 @@ make security
 
 ## 🚀 Performance & Compatibility
 
-<div align="center">
 
 ### 🐍 **Python Support**
-![Python 3.8](https://img.shields.io/badge/3.8-✅-green) ![Python 3.9](https://img.shields.io/badge/3.9-✅-green) ![Python 3.10](https://img.shields.io/badge/3.10-✅-green) ![Python 3.11](https://img.shields.io/badge/3.11-✅-green) ![Python 3.12](https://img.shields.io/badge/3.12-✅-green)
+![Python 3.9](https://img.shields.io/badge/3.9-✅-green) ![Python 3.10](https://img.shields.io/badge/3.10-✅-green) ![Python 3.11](https://img.shields.io/badge/3.11-✅-green) ![Python 3.12](https://img.shields.io/badge/3.12-✅-green)
 
 ### 🎯 **Django Support**
 ![Django 3.2](https://img.shields.io/badge/3.2%20LTS-✅-green) ![Django 4.0](https://img.shields.io/badge/4.0-✅-green) ![Django 4.1](https://img.shields.io/badge/4.1-✅-green) ![Django 4.2](https://img.shields.io/badge/4.2%20LTS-✅-green) ![Django 5.0](https://img.shields.io/badge/5.0-✅-green)
 
-</div>
 
 ---
 
