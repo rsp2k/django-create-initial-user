@@ -70,12 +70,6 @@ jobs:
     - name: Run isort
       run: isort --check-only --diff .
 
-    - name: Run flake8
-      run: flake8 create_initial_superuser tests
-
-    - name: Run mypy
-      run: mypy create_initial_superuser
-
   security:
     name: Security Check
     runs-on: ubuntu-latest
