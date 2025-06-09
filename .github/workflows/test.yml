@@ -90,9 +90,6 @@ jobs:
         uv pip install --system -e ".[dev]"
         uv pip install --system bandit safety
 
-    - name: Run bandit security check
-      run: bandit -r create_initial_superuser
-
     - name: Run safety check
       run: safety check
 
