@@ -20,6 +20,9 @@ help:
 	@echo "  build         Build distribution packages"
 	@echo "  publish-test  Publish to Test PyPI"
 	@echo "  publish       Publish to PyPI"
+	@echo "  publish-interactive  Interactive publishing with validation"
+	@echo "  release-interactive  Interactive release creation"
+	@echo "  release-patch        Quick patch release"
 	@echo "  docs          Build documentation"
 	@echo "  dev-setup     Complete development environment setup"
 
@@ -81,10 +84,34 @@ build: clean
 	uv build
 
 publish-test: build
-	uv run twine upload --repository testpypi dist/*
+	python -m twine upload --repository testpypi dist/*
 
 publish: build
-	uv run twine upload dist/*
+	python -m twine upload dist/*
+
+# Automated release workflows
+release-interactive:
+	python create-release.py
+
+release-patch:
+	@echo "🚀 Creating patch release..."
+	@python -c "import subprocess, re; \
+		content = open('pyproject.toml').read(); \
+		version = re.search(r'version = \"([^\"]+)\"', content).group(1); \
+		parts = version.split('.'); \
+		new_version = f'{parts[0]}.{parts[1]}.{int(parts[2])+1}'; \
+		print(f'Updating to {new_version}'); \
+		new_content = re.sub(r'version = \"[^\"]+\"', f'version = \"{new_version}\"', content); \
+		open('pyproject.toml', 'w').write(new_content); \
+		subprocess.run(['git', 'add', 'pyproject.toml']); \
+		subprocess.run(['git', 'commit', '-m', f'bump: version {new_version}']); \
+		subprocess.run(['git', 'tag', f'v{new_version}']); \
+		subprocess.run(['git', 'push']); \
+		subprocess.run(['git', 'push', 'origin', f'v{new_version}'])"
+
+# Interactive publishing
+publish-interactive:
+	python publish-to-pypi.py
 
 # Documentation
 docs:

@@ -14,6 +14,11 @@ on:
         - testpypi
         - pypi
 
+# Required for trusted publishing
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
@@ -46,23 +51,43 @@ jobs:
       if: github.event.inputs.environment == 'testpypi'
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
         repository-url: https://test.pypi.org/legacy/
         skip-existing: true
 
     - name: Publish to PyPI
       if: github.event.inputs.environment == 'pypi' || github.event_name == 'release'
       uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
 
-    - name: Create GitHub Release Assets
+    - name: Create release summary
       if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "## 🎉 Package Published Successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Package**: django-create-initial-user" >> $GITHUB_STEP_SUMMARY
+        echo "**Version**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "**PyPI URL**: https://pypi.org/project/django-create-initial-user/" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📦 Installation" >> $GITHUB_STEP_SUMMARY
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        echo "pip install django-create-initial-user" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+
+  test-install:
+    name: Test installation from PyPI
+    runs-on: ubuntu-latest
+    needs: build-and-publish
+    if: github.event_name == 'release'
+
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/django-create-initial-user-*.whl
-        asset_name: django-create-initial-user-${{ github.event.release.tag_name }}-py3-none-any.whl
-        asset_content_type: application/octet-stream
+        python-version: "3.11"
+
+    - name: Wait for PyPI propagation
+      run: sleep 60
+
+    - name: Test installation
+      run: |
+        pip install django-create-initial-user
+        python -c "import create_initial_superuser; print('✅ Package imported successfully!')"

@@ -1,0 +1,134 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pyproject.toml'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - prerelease
+        - release
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  check-version:
+    name: Check if version changed
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_changed: ${{ steps.version.outputs.changed }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Get current version
+      id: version
+      run: |
+        CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+        # Check if version changed in this push
+        if git diff HEAD~1 HEAD --name-only | grep -q "pyproject.toml"; then
+          if git diff HEAD~1 HEAD pyproject.toml | grep -q "^+version = "; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Version changed to $CURRENT_VERSION"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "ℹ️  pyproject.toml changed but version didn't"
+          fi
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+          echo "ℹ️  pyproject.toml not changed"
+        fi
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: check-version
+    if: needs.check-version.outputs.version_changed == 'true' || github.event_name == 'workflow_dispatch'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set version
+      id: set_version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+          echo "Using manual version: $VERSION"
+
+          # Update pyproject.toml
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+
+          # Commit version change
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pyproject.toml
+          git commit -m "bump: version $VERSION" || echo "No changes to commit"
+          git push
+        else
+          VERSION="${{ needs.check-version.outputs.version }}"
+          echo "Using detected version: $VERSION"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Extract changelog
+      id: changelog
+      run: |
+        VERSION="${{ steps.set_version.outputs.version }}"
+
+        # Extract changelog for this version
+        if grep -q "## \[$VERSION\]" CHANGELOG.md; then
+          sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > release_notes.md
+        else
+          echo "## What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+          echo "* Version $VERSION release" >> release_notes.md
+        fi
+
+        echo "📋 Release notes:"
+        cat release_notes.md
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.set_version.outputs.version }}
+        release_name: v${{ steps.set_version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+
+  notify-success:
+    name: Notify successful release
+    runs-on: ubuntu-latest
+    needs: [check-version, create-release]
+    if: success()
+
+    steps:
+    - name: Create success summary
+      run: |
+        echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Version**: v${{ needs.check-version.outputs.version || github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Release URL**: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.check-version.outputs.version || github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The package will be automatically published to PyPI! 🚀" >> $GITHUB_STEP_SUMMARY
