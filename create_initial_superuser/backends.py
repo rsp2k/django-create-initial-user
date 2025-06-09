@@ -10,6 +10,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.http import HttpRequest
 
+User = get_user_model()
+
 
 class CreateInitialSuperUserBackend(ModelBackend):
     """
@@ -48,11 +50,9 @@ class CreateInitialSuperUserBackend(ModelBackend):
         if not username or not password:
             return None
 
-        UserModel = get_user_model()
-
         # Check if we should create an initial superuser
-        if settings.DEBUG and not UserModel.objects.filter(is_superuser=True).exists():
-            return self._create_initial_superuser(UserModel, username, password)
+        if settings.DEBUG and not User.objects.filter(is_superuser=True).exists():
+            return self._create_initial_superuser(User, username, password)
         else:
             # Fallback to the default ModelBackend authentication
             return super().authenticate(
@@ -60,13 +60,13 @@ class CreateInitialSuperUserBackend(ModelBackend):
             )
 
     def _create_initial_superuser(
-        self, UserModel: type, username: str, password: str
+        self, User: type, username: str, password: str
     ) -> AbstractUser:
         """
         Create the initial superuser account.
 
         Args:
-            UserModel: The user model class
+            User: The user model class
             username: Username for the new superuser
             password: Password for the new superuser
 
@@ -81,7 +81,7 @@ class CreateInitialSuperUserBackend(ModelBackend):
         )
 
         hashed_password = make_password(password)
-        user = UserModel.objects.create(
+        user = User.objects.create(
             username=username,
             password=hashed_password,
             is_staff=True,
