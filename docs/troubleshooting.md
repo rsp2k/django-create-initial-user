@@ -24,7 +24,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 if DEBUG:
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -216,7 +216,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    
+
     # Optional: email field for auto-detection
     email = models.EmailField(blank=True)
 ```

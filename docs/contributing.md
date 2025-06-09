@@ -188,7 +188,7 @@ def test_create_initial_superuser_when_no_superusers_exist(self):
     """Test that superuser is created when none exist and DEBUG=True."""
     # Arrange
     self.assertEqual(self.UserModel.objects.count(), 0)
-    
+
     # Act
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
@@ -197,7 +197,7 @@ def test_create_initial_superuser_when_no_superusers_exist(self):
             username=self.test_username,
             password=self.test_password
         )
-    
+
     # Assert
     self.assertIsNotNone(user)
     self.assertTrue(user.is_superuser)
@@ -251,13 +251,13 @@ def authenticate(
 ) -> Optional[AbstractUser]:
     """
     Authenticate user and create initial superuser if needed.
-    
+
     Args:
         request: The HTTP request object
         username: Username for authentication
         password: Password for authentication
         **kwargs: Additional keyword arguments
-        
+
     Returns:
         User object if authentication successful, None otherwise
     """

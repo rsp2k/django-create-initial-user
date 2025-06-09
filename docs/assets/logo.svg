@@ -1,24 +1,24 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <!-- Background circle -->
   <circle cx="100" cy="100" r="90" fill="#0C4A6E" stroke="#0EA5E9" stroke-width="4"/>
-  
+
   <!-- Django D -->
   <path d="M60 60 L60 140 L80 140 L80 80 L100 80 C110 80 120 70 120 60 C120 50 110 40 100 40 L60 40 Z M80 60 L100 60 L100 60 Z" fill="#092C48"/>
-  
+
   <!-- Lock icon -->
   <rect x="110" y="90" width="30" height="25" rx="3" fill="#FCD34D" stroke="#F59E0B" stroke-width="2"/>
   <path d="M115 90 L115 85 C115 80 119 76 125 76 C131 76 135 80 135 85 L135 90" fill="none" stroke="#F59E0B" stroke-width="3"/>
   <circle cx="125" cy="102" r="3" fill="#F59E0B"/>
-  
+
   <!-- User icon -->
   <circle cx="70" cy="120" r="8" fill="#34D399"/>
   <path d="M55 140 C55 132 62 125 70 125 C78 125 85 132 85 140" fill="#34D399"/>
-  
+
   <!-- Magic sparkles -->
   <path d="M140 50 L142 55 L147 53 L145 58 L150 60 L145 62 L147 67 L142 65 L140 70 L138 65 L133 67 L135 62 L130 60 L135 58 L133 53 L138 55 Z" fill="#FCD34D"/>
   <path d="M165 80 L167 83 L170 82 L169 85 L172 87 L169 89 L170 92 L167 91 L165 94 L163 91 L160 92 L161 89 L158 87 L161 85 L160 82 L163 83 Z" fill="#34D399"/>
   <path d="M35 75 L36 77 L38 76 L37 78 L39 79 L37 80 L38 82 L36 81 L35 83 L34 81 L32 82 L33 80 L31 79 L33 78 L32 76 L34 77 Z" fill="#F59E0B"/>
-  
+
   <!-- Title text -->
   <text x="100" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0C4A6E">Django Create Initial User</text>
 </svg>

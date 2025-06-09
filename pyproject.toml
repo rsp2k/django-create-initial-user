@@ -103,15 +103,6 @@ known_django = "django"
 known_first_party = "create_initial_superuser"
 sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 
-# pytest configuration
-[tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "tests.settings"
-python_files = ["tests.py", "test_*.py", "*_test.py"]
-addopts = "--tb=short --strict-markers --strict-config"
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-]
-
 # Coverage configuration
 [tool.coverage.run]
 source = ["create_initial_superuser"]

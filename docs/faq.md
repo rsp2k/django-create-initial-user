@@ -69,7 +69,7 @@ if DEBUG:
 
 ```python
 if DEBUG or os.getenv('ENABLE_INITIAL_SUPERUSER'):
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -79,7 +79,7 @@ if DEBUG or os.getenv('ENABLE_INITIAL_SUPERUSER'):
 ## 🚀 Usage
 
 ### Q: How do I create a superuser with this package?
-**A:** 
+**A:**
 1. Navigate to your Django admin login page (`/admin/`)
 2. Enter any username and password you want for your superuser
 3. Click "Log in"
@@ -197,7 +197,7 @@ environment:
 
 ```python
 if os.getenv('ENABLE_INITIAL_SUPERUSER', '').lower() in ('true', '1', 'yes'):
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -214,7 +214,7 @@ if os.getenv('ENABLE_INITIAL_SUPERUSER', '').lower() in ('true', '1', 'yes'):
 - Share your success stories
 
 ### Q: How do I set up a development environment?
-**A:** 
+**A:**
 
 ```bash
 git clone https://github.com/yourusername/django-create-initial-user.git
@@ -223,7 +223,7 @@ make dev-setup
 ```
 
 ### Q: How do I run the tests?
-**A:** 
+**A:**
 
 ```bash
 # Quick test

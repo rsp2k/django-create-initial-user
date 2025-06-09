@@ -75,7 +75,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Only enable in development or initial deployment
 if DEBUG or os.getenv('ENABLE_INITIAL_SUPERUSER'):
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```
@@ -89,8 +89,8 @@ from django.contrib.auth import get_user_model
 def create_initial_superuser():
     User = get_user_model()
     if not User.objects.filter(is_superuser=True).exists():
-        call_command('createsuperuser', 
-                    username='admin', 
+        call_command('createsuperuser',
+                    username='admin',
                     email='admin@example.com',
                     interactive=False)
 ```

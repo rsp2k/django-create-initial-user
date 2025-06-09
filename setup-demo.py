@@ -129,7 +129,7 @@ def setup_demo_project(project_name):
         return False
 
     # Read current settings
-    with open(settings_path, "r") as f:
+    with open(settings_path) as f:
         settings_content = f.read()
 
     # Add our app to INSTALLED_APPS
@@ -148,7 +148,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 if DEBUG:
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 """
@@ -176,30 +176,30 @@ def print_demo_instructions(project_name):
     ╔══════════════════════════════════════════════════════════════════╗
     ║                          🎉 Demo Ready!                         ║
     ╚══════════════════════════════════════════════════════════════════╝
-    
+
     Your demo Django project is ready! Here's how to test it:
-    
+
     1️⃣  Start the development server:
         cd {project_name}
         python manage.py runserver
-    
+
     2️⃣  Open your browser and go to:
         http://localhost:8000/admin/
-    
+
     3️⃣  Login with ANY credentials you want:
         Username: admin
         Password: mysecretpassword
         (Or use any username/password you prefer!)
-    
+
     4️⃣  You'll be automatically logged in as a superuser! 🎊
-    
+
     ✨ That's it! No need to run 'createsuperuser' ever again!
-    
+
     📚 Next steps:
         - Check out the full documentation
         - Add this to your existing Django projects
         - Share your success story with us!
-    
+
     🔗 Useful links:
         - GitHub: https://github.com/yourusername/django-create-initial-user
         - Documentation: https://docs.django-create-initial-user.com
@@ -214,32 +214,32 @@ def print_manual_setup():
     ╔══════════════════════════════════════════════════════════════════╗
     ║                     📋 Manual Setup Guide                       ║
     ╚══════════════════════════════════════════════════════════════════╝
-    
+
     To add django-create-initial-user to your existing Django project:
-    
+
     1️⃣  Add to your INSTALLED_APPS in settings.py:
         INSTALLED_APPS = [
             # ... your existing apps
             'create_initial_superuser',
         ]
-    
+
     2️⃣  Configure authentication backends in settings.py:
         AUTHENTICATION_BACKENDS = [
             'django.contrib.auth.backends.ModelBackend',
         ]
-        
+
         if DEBUG:
-            AUTHENTICATION_BACKENDS.insert(0, 
+            AUTHENTICATION_BACKENDS.insert(0,
                 'create_initial_superuser.backends.CreateInitialSuperUserBackend'
             )
-    
+
     3️⃣  That's it! Now when you go to /admin/ and login with any
         credentials, a superuser will be created automatically!
-    
-    🔒 Security Note: 
+
+    🔒 Security Note:
         The backend only works when DEBUG=True by default.
         Remove it from AUTHENTICATION_BACKENDS in production!
-    
+
     📚 For more details, check out our documentation:
         https://github.com/yourusername/django-create-initial-user
     """

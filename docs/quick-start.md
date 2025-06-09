@@ -39,7 +39,7 @@ AUTHENTICATION_BACKENDS = [
 
 # Enable for development only
 if DEBUG:
-    AUTHENTICATION_BACKENDS.insert(0, 
+    AUTHENTICATION_BACKENDS.insert(0,
         'create_initial_superuser.backends.CreateInitialSuperUserBackend'
     )
 ```

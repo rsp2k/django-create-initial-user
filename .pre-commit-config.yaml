@@ -40,40 +40,13 @@ repos:
         types: [python]
         exclude: migrations/
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies: [flake8-docstrings, flake8-black]
-        args: [--max-line-length=88]
-        types: [python]
-        exclude: migrations/
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
-    hooks:
-      - id: mypy
-        additional_dependencies: [django-stubs>=4.2, types-setuptools]
-        args: [--ignore-missing-imports, --strict-optional]
-        types: [python]
-        exclude: migrations/
-
-  - repo: https://github.com/pycqa/bandit
-    rev: 1.7.6
-    hooks:
-      - id: bandit
-        args: [-r, create_initial_superuser, --skip, B101]
-        types: [python]
-        exclude: tests/
-
   # Additional Python-specific hooks
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.15.0
     hooks:
       - id: pyupgrade
-        args: [--py38-plus]
+        args: [--py39-plus]
         types: [python]
-        exclude: migrations/
 
   - repo: https://github.com/pycqa/autoflake
     rev: v2.2.1

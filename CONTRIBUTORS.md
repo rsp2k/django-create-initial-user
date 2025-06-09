@@ -178,8 +178,8 @@ We welcome and encourage contributions from people of all backgrounds, experienc
 
 ## 💌 Thank You Message
 
-> "Every contribution, no matter how small, makes a difference. Whether you're fixing a typo, reporting a bug, or adding a major feature, you're helping make Django development easier for thousands of developers around the world. Thank you for being part of our community!" 
-> 
+> "Every contribution, no matter how small, makes a difference. Whether you're fixing a typo, reporting a bug, or adding a major feature, you're helping make Django development easier for thousands of developers around the world. Thank you for being part of our community!"
+>
 > — The Django Create Initial User Team
 
 ---

@@ -1,7 +1,7 @@
 """Django authentication backend for creating initial superuser."""
 
 import warnings
-from typing import Optional
+from typing import Any, Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -28,22 +28,23 @@ class CreateInitialSuperUserBackend(ModelBackend):
     def authenticate(
         self,
         request: Optional[HttpRequest],
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        **kwargs,
-    ) -> Optional[AbstractUser]:
+        username: Optional[str] = "",
+        password: Optional[str] = "",
+        **kwargs: Any,
+    ) -> Optional[User]:
         """
         Authenticate user and create initial superuser if needed.
 
         Args:
             request: The HTTP request object
-            username: Username for authentication
-            password: Password for authentication
+            username: Username
+            password: Password
             **kwargs: Additional keyword arguments
 
         Returns:
             User object if authentication successful, None otherwise
         """
+
         if not username or not password:
             return None
 
