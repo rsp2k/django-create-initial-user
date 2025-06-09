@@ -1,0 +1,55 @@
+name: Status Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  required-checks:
+    name: Required Status Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies
+      run: |
+        uv pip install --system Django>=4.2
+        uv pip install --system -e ".[test]"
+
+    - name: Django Check
+      run: |
+        python -m django check --settings=tests.settings
+
+    - name: Import Check
+      run: |
+        python -c "
+        import create_initial_superuser
+        from create_initial_superuser.backends import CreateInitialSuperUserBackend
+        from create_initial_superuser.apps import CreateInitialSuperuserConfig
+        print('✅ All imports successful')
+        "
+
+    - name: Quick Test
+      run: |
+        python -m django test tests.test_apps --settings=tests.settings -v 1
+
+    - name: Create status check summary
+      run: |
+        echo "## ✅ Status Checks Passed" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- Django configuration check: ✅" >> $GITHUB_STEP_SUMMARY
+        echo "- Import checks: ✅" >> $GITHUB_STEP_SUMMARY
+        echo "- Quick tests: ✅" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "All required checks have passed successfully!" >> $GITHUB_STEP_SUMMARY

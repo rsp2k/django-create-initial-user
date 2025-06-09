@@ -1,0 +1,175 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.changes.outputs.code }}
+      tests: ${{ steps.changes.outputs.tests }}
+      docs: ${{ steps.changes.outputs.docs }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dorny/paths-filter@v2
+      id: changes
+      with:
+        filters: |
+          code:
+            - 'create_initial_superuser/**'
+            - 'pyproject.toml'
+            - 'setup.cfg'
+          tests:
+            - 'tests/**'
+            - 'pyproject.toml'
+          docs:
+            - 'docs/**'
+            - 'README.md'
+            - '*.md'
+
+  test-pr:
+    name: Test PR Changes
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true' || needs.changes.outputs.tests == 'true'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+        django-version: ["4.2", "5.0"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies
+      run: |
+        uv pip install --system "Django~=${{ matrix.django-version }}.0"
+        uv pip install --system -e ".[dev]"
+
+    - name: Run Django checks
+      run: |
+        python -m django check --settings=tests.settings
+
+    - name: Run tests
+      run: |
+        python -m django test --settings=tests.settings -v 2
+
+    - name: Run linting
+      run: |
+        uv run black --check --diff .
+        uv run isort --check-only --diff .
+        uv run flake8 create_initial_superuser tests
+
+    - name: Run type checking
+      run: |
+        uv run mypy create_initial_superuser
+
+    - name: Test coverage
+      run: |
+        coverage run --source='create_initial_superuser' -m django test --settings=tests.settings
+        coverage report -m
+        coverage html
+
+    - name: Upload coverage artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-${{ matrix.python-version }}-${{ matrix.django-version }}
+        path: htmlcov/
+
+  lint-pr:
+    name: Lint PR
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies
+      run: |
+        uv pip install --system -e ".[dev]"
+
+    - name: Check code formatting
+      run: |
+        uv run black --check --diff .
+        uv run isort --check-only --diff .
+
+    - name: Lint code
+      run: |
+        uv run flake8 create_initial_superuser tests
+
+    - name: Type check
+      run: |
+        uv run mypy create_initial_superuser
+
+    - name: Security check
+      run: |
+        uv run bandit -r create_initial_superuser
+
+  comment-coverage:
+    name: Comment Coverage
+    runs-on: ubuntu-latest
+    needs: test-pr
+    if: needs.test-pr.result == 'success' && github.event.action == 'opened'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install dependencies
+      run: |
+        pip install coverage
+
+    - name: Download coverage artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-3.11-4.2
+
+    - name: Generate coverage comment
+      id: coverage
+      run: |
+        coverage report --format=markdown > coverage_report.md
+        {
+          echo 'COVERAGE_REPORT<<EOF'
+          cat coverage_report.md
+          echo EOF
+        } >> $GITHUB_OUTPUT
+
+    - name: Comment PR
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 📊 Coverage Report
+
+            ${{ steps.coverage.outputs.COVERAGE_REPORT }}
+
+            View detailed coverage report in the artifacts section.`
+          });
