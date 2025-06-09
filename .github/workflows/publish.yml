@@ -39,8 +39,8 @@ jobs:
 
     - name: Check distribution
       run: |
-        uv pip install twine
-        uv run twine check dist/*
+        uv pip install --system twine
+        twine check dist/*
 
     - name: Publish to Test PyPI
       if: github.event.inputs.environment == 'testpypi'

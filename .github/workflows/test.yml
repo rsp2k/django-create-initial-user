@@ -40,17 +40,14 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v3
 
-    - name: Create virtual environment
-      run: uv venv
-
     - name: Install dependencies
       run: |
-        uv pip install "Django~=${{ matrix.django-version }}.0"
-        uv pip install -e ".[test]"
+        uv pip install --system "Django~=${{ matrix.django-version }}.0"
+        uv pip install --system -e ".[test]"
 
     - name: Run tests with pytest
       run: |
-        uv run pytest tests/ -v --tb=short --cov=create_initial_superuser --cov-report=xml --cov-report=term-missing
+        python -m pytest tests/ -v --tb=short --cov=create_initial_superuser --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11' && matrix.django-version == '4.2'
@@ -74,24 +71,21 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v3
 
-    - name: Create virtual environment
-      run: uv venv
-
     - name: Install dependencies
       run: |
-        uv pip install -e ".[dev]"
+        uv pip install --system -e ".[dev]"
 
     - name: Run black
-      run: uv run black --check --diff .
+      run: black --check --diff .
 
     - name: Run isort
-      run: uv run isort --check-only --diff .
+      run: isort --check-only --diff .
 
     - name: Run flake8
-      run: uv run flake8 create_initial_superuser tests
+      run: flake8 create_initial_superuser tests
 
     - name: Run mypy
-      run: uv run mypy create_initial_superuser
+      run: mypy create_initial_superuser
 
   security:
     name: Security Check
@@ -108,19 +102,16 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v3
 
-    - name: Create virtual environment
-      run: uv venv
-
     - name: Install dependencies
       run: |
-        uv pip install -e ".[dev]"
-        uv pip install bandit safety
+        uv pip install --system -e ".[dev]"
+        uv pip install --system bandit safety
 
     - name: Run bandit security check
-      run: uv run bandit -r create_initial_superuser
+      run: bandit -r create_initial_superuser
 
     - name: Run safety check
-      run: uv run safety check
+      run: safety check
 
   build:
     name: Build Package
@@ -143,8 +134,8 @@ jobs:
 
     - name: Check package
       run: |
-        uv pip install twine
-        uv run twine check dist/*
+        uv pip install --system twine
+        twine check dist/*
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

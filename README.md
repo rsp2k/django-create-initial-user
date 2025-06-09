@@ -416,12 +416,17 @@ are always welcome!<br/>
 git clone https://github.com/rsp2k/django-create-initial-user.git
 cd django-create-initial-user
 
-# Set up development environment
+# Option 1: Automated setup (recommended)
 make dev-setup
 
+# Option 2: Manual setup with uv
+uv venv                    # Creates .venv virtual environment
+uv pip install -e ".[dev]" # Install with dev dependencies
+uv run pre-commit install  # Install git hooks
+
 # Run tests and quality checks
-make test
-make lint
+make test                  # Or: python dev-test.py
+make lint                  # Or: uv run pytest tests/
 
 # You're ready to contribute! 🎉
 ```

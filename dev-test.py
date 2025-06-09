@@ -23,11 +23,18 @@ def run_command(cmd, description):
 def main():
     """Run the development test suite."""
     print("🚀 Django Create Initial User - Development Test Suite")
-
+    
     # Change to project directory
     project_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(project_dir)
-
+    
+    # Ensure virtual environment exists
+    if not os.path.exists('.venv'):
+        print("🔧 Creating virtual environment...")
+        if not run_command(['uv', 'venv'], 'Creating virtual environment'):
+            print("❌ Failed to create virtual environment")
+            sys.exit(1)
+    
     commands = [
         (
             ["uv", "pip", "install", "-e", ".[dev]"],

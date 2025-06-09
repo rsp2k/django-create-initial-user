@@ -73,7 +73,10 @@ docs:
 # Development environment setup
 dev-setup:
 	@echo "🚀 Setting up development environment..."
-	uv venv
+	@if [ ! -d ".venv" ]; then \
+		echo "📦 Creating virtual environment..."; \
+		uv venv; \
+	fi
 	@echo "📦 Installing development dependencies..."
 	uv pip install -e ".[dev]"
 	@echo "🔧 Installing pre-commit hooks..."
