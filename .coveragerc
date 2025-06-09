@@ -1,0 +1,36 @@
+[run]
+source = create_initial_superuser
+omit =
+    */migrations/*
+    */tests/*
+    */venv/*
+    */virtualenv/*
+    */.venv/*
+    */site-packages/*
+    */__pycache__/*
+    */test_*
+    */conftest.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+
+show_missing = True
+precision = 2
+skip_covered = False
+
+[html]
+directory = htmlcov
+title = django-create-initial-user Coverage Report
+
+[xml]
+output = coverage.xml

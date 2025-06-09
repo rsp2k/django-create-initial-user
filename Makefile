@@ -7,7 +7,10 @@ help:
 	@echo "Available commands:"
 	@echo "  install        Install package in production mode"
 	@echo "  install-dev    Install package in development mode"
-	@echo "  test          Run tests with pytest"
+	@echo "  test          Run tests with Django test runner"
+	@echo "  test-coverage Run tests with coverage reporting"
+	@echo "  test-quick    Run tests with minimal output"
+	@echo "  test-backends Run only backend tests"
 	@echo "  test-all      Run tests with tox (all Python/Django versions)"
 	@echo "  lint          Run all linting tools"
 	@echo "  format        Format code with black and isort"
@@ -35,7 +38,16 @@ install-dev:
 
 # Testing
 test:
-	uv run pytest tests/ -v --cov=create_initial_superuser --cov-report=term-missing
+	uv run python -m django test --settings=tests.settings -v 2
+
+test-coverage:
+	uv run coverage run --source='create_initial_superuser' -m django test --settings=tests.settings && coverage report -m && coverage html
+
+test-quick:
+	uv run python -m django test --settings=tests.settings -v 1
+
+test-backends:
+	uv run python -m django test tests.test_backends --settings=tests.settings -v 2
 
 test-all:
 	tox
