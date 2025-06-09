@@ -2,133 +2,163 @@ name: Release
 
 on:
   push:
-    branches: [main]
-    paths:
-      - 'pyproject.toml'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., 1.0.0)'
-        required: true
-        type: string
-      release_type:
-        description: 'Type of release'
-        required: true
-        default: 'release'
-        type: choice
-        options:
-        - prerelease
-        - release
-
-permissions:
-  contents: write
-  id-token: write
-  pull-requests: write
+    tags:
+      - 'v*'
+  release:
+    types: [published]
 
 jobs:
-  check-version:
-    name: Check if version changed
+  test-before-release:
+    name: Test Before Release
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      version_changed: ${{ steps.version.outputs.changed }}
+
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        django-version: ["4.2", "5.0", "5.1"]
+        exclude:
+          - python-version: "3.9"
+            django-version: "5.0"
+          - python-version: "3.9"
+            django-version: "5.1"
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        fetch-depth: 2
+        python-version: ${{ matrix.python-version }}
 
-    - name: Get current version
-      id: version
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies
       run: |
-        CURRENT_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
-        echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        uv pip install --system "Django~=${{ matrix.django-version }}.0"
+        uv pip install --system -e ".[test]"
 
-        # Check if version changed in this push
-        if git diff HEAD~1 HEAD --name-only | grep -q "pyproject.toml"; then
-          if git diff HEAD~1 HEAD pyproject.toml | grep -q "^+version = "; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "✅ Version changed to $CURRENT_VERSION"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "ℹ️  pyproject.toml changed but version didn't"
-          fi
-        else
-          echo "changed=false" >> $GITHUB_OUTPUT
-          echo "ℹ️  pyproject.toml not changed"
-        fi
+    - name: Run Django checks
+      run: |
+        python -m django check --settings=tests.settings
 
-  create-release:
+    - name: Run all tests
+      run: |
+        python -m django test --settings=tests.settings -v 2
+
+  build-and-publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    needs: test-before-release
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install build dependencies
+      run: |
+        uv pip install --system build twine
+
+    - name: Build package
+      run: |
+        python -m build
+
+    - name: Check package
+      run: |
+        twine check dist/*
+
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        twine upload dist/*
+
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-dist
+        path: dist/
+
+  create-github-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
-    needs: check-version
-    if: needs.check-version.outputs.version_changed == 'true' || github.event_name == 'workflow_dispatch'
+    needs: test-before-release
+    if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set version
-      id: set_version
+    - name: Extract tag name
+      id: tag
+      run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Build package
       run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          VERSION="${{ github.event.inputs.version }}"
-          echo "Using manual version: $VERSION"
-
-          # Update pyproject.toml
-          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
-
-          # Commit version change
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add pyproject.toml
-          git commit -m "bump: version $VERSION" || echo "No changes to commit"
-          git push
-        else
-          VERSION="${{ needs.check-version.outputs.version }}"
-          echo "Using detected version: $VERSION"
-        fi
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        uv build
 
     - name: Extract changelog
       id: changelog
       run: |
-        VERSION="${{ steps.set_version.outputs.version }}"
-
-        # Extract changelog for this version
-        if grep -q "## \[$VERSION\]" CHANGELOG.md; then
-          sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' > release_notes.md
+        if [ -f CHANGELOG.md ]; then
+          # Extract the latest version's changelog
+          awk '/^## / { if(found) exit; if(/^## \[${{ steps.tag.outputs.tag }}|^## ${{ steps.tag.outputs.tag }}/) found=1; next } found' CHANGELOG.md > latest_changes.md
+          {
+            echo 'CHANGELOG<<EOF'
+            cat latest_changes.md
+            echo EOF
+          } >> $GITHUB_OUTPUT
         else
-          echo "## What's Changed" > release_notes.md
-          echo "" >> release_notes.md
-          echo "* Version $VERSION release" >> release_notes.md
+          echo 'CHANGELOG=Release ${{ steps.tag.outputs.tag }}' >> $GITHUB_OUTPUT
         fi
-
-        echo "📋 Release notes:"
-        cat release_notes.md
 
     - name: Create Release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ steps.set_version.outputs.version }}
-        release_name: v${{ steps.set_version.outputs.version }}
-        body_path: release_notes.md
+        tag_name: ${{ steps.tag.outputs.tag }}
+        release_name: Release ${{ steps.tag.outputs.tag }}
+        body: |
+          ## Changes
+
+          ${{ steps.changelog.outputs.CHANGELOG }}
+
+          ## Installation
+
+          ```bash
+          pip install django-create-initial-user==${{ steps.tag.outputs.tag }}
+          ```
+
+          ## Assets
+
+          - Source code (zip/tar.gz)
+          - Python wheel and source distribution
         draft: false
-        prerelease: ${{ github.event.inputs.release_type == 'prerelease' }}
+        prerelease: false
 
-  notify-success:
-    name: Notify successful release
-    runs-on: ubuntu-latest
-    needs: [check-version, create-release]
-    if: success()
-
-    steps:
-    - name: Create success summary
-      run: |
-        echo "## 🎉 Release Created Successfully!" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Version**: v${{ needs.check-version.outputs.version || github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "**Release URL**: https://github.com/${{ github.repository }}/releases/tag/v${{ needs.check-version.outputs.version || github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "The package will be automatically published to PyPI! 🚀" >> $GITHUB_STEP_SUMMARY
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/
+        asset_name: dist
+        asset_content_type: application/zip

@@ -55,10 +55,10 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/django-create-initial-user"
-Repository = "https://github.com/yourusername/django-create-initial-user"
-Issues = "https://github.com/yourusername/django-create-initial-user/issues"
-Changelog = "https://github.com/yourusername/django-create-initial-user/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/rsp2k/django-create-initial-user"
+Repository = "https://github.com/rsp2k/django-create-initial-user"
+Issues = "https://github.com/rsp2k/django-create-initial-user/issues"
+Changelog = "https://github.com/rsp2k/django-create-initial-user/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.sdist]
 include = [

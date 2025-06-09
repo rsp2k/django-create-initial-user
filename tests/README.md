@@ -9,7 +9,7 @@ This directory contains the test suite for the `django-create-initial-user` pack
 - `settings.py` - Django settings for testing
 - `urls.py` - Django URL configuration for testing
 
-## Running Tests
+## Running Tests Locally
 
 ### Using Django's test runner directly:
 ```bash
@@ -37,6 +37,37 @@ coverage run --source='create_initial_superuser' -m django test --settings=tests
 coverage report -m
 coverage html
 ```
+
+## GitHub Actions CI/CD
+
+### Automated Testing
+Tests run automatically on:
+- **Push to main/develop** - Full test matrix across Python 3.9-3.12 and Django 4.2-5.1
+- **Pull Requests** - Targeted tests on Python 3.11 with Django 4.2 & 5.0
+- **Weekly Schedule** - Monday 8 AM UTC comprehensive test run
+- **Manual Dispatch** - Custom Python/Django version testing
+
+### Workflows:
+- **`test.yml`** - Main test suite with full matrix
+- **`ci.yml`** - Comprehensive CI with quick/full test modes
+- **`pr.yml`** - Pull request validation with linting and coverage
+- **`status.yml`** - Required status checks for imports and basic functionality
+- **`security.yml`** - Daily security scans with Bandit and Safety
+- **`release.yml`** - Release validation and PyPI publishing
+
+### Status Badges
+Add these to your README.md:
+```markdown
+![Tests](https://github.com/yourusername/django-create-initial-user/workflows/Tests/badge.svg)
+![CI](https://github.com/yourusername/django-create-initial-user/workflows/CI/badge.svg)
+[![codecov](https://codecov.io/gh/yourusername/django-create-initial-user/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/django-create-initial-user)
+```
+
+### Coverage Reporting
+- **Codecov integration** - Automatic coverage reporting
+- **PR comments** - Coverage reports posted on pull requests
+- **HTML reports** - Available as workflow artifacts
+- **Minimum coverage** - Tracked via .coveragerc configuration
 
 ## Test Configuration
 
