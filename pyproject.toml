@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-create-initial-user"
-version = "1.2.0"
+version = "1.2.1"
 description = "Django authentication backend that automatically creates a superuser on first login"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -123,7 +123,7 @@ exclude_lines = [
 
 # MyPy configuration
 [tool.mypy]
-python_version = "1.2.0"
+python_version = "1.2.1"
 check_untyped_defs = true
 ignore_missing_imports = true
 warn_unused_ignores = true
