@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-create-initial-user"
-version = "1.0.0"
+version = "1.1.1"
 description = "Django authentication backend that automatically creates a superuser on first login"
 readme = "README.md"
 license = { file = "LICENSE" }
