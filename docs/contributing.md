@@ -50,7 +50,15 @@ make dev-setup
 
 ### 3. Install Pre-commit Hooks
 ```bash
-pre-commit install
+# Option 1: Use our setup script (recommended)
+python setup-precommit.py
+
+# Option 2: Manual installation
+uv run pre-commit install
+uv run pre-commit install --hook-type commit-msg
+
+# Option 3: Use Makefile
+make precommit-install
 ```
 
 ### 4. Run Tests

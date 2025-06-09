@@ -12,6 +12,10 @@ help:
 	@echo "  lint          Run all linting tools"
 	@echo "  format        Format code with black and isort"
 	@echo "  security      Run security checks"
+	@echo "  precommit-install    Install pre-commit hooks"
+	@echo "  precommit-run        Run pre-commit on all files"
+	@echo "  precommit-update     Update pre-commit hook versions"
+	@echo "  precommit-setup      Complete pre-commit setup with validation"
 	@echo "  clean         Clean build artifacts"
 	@echo "  build         Build distribution packages"
 	@echo "  publish-test  Publish to Test PyPI"
@@ -43,10 +47,27 @@ lint:
 format:
 	uv run black .
 	uv run isort .
+	@echo "✅ Code formatted with Black and isort"
 
 security:
 	uv run bandit -r create_initial_superuser
 	uv run safety check
+
+# Pre-commit hooks
+precommit-install:
+	uv run pre-commit install
+	uv run pre-commit install --hook-type commit-msg
+	@echo "✅ Pre-commit hooks installed"
+
+precommit-run:
+	uv run pre-commit run --all-files
+
+precommit-update:
+	uv run pre-commit autoupdate
+	@echo "✅ Pre-commit hooks updated"
+
+precommit-setup:
+	python setup-precommit.py
 
 # Build and publish
 clean:
@@ -81,6 +102,7 @@ dev-setup:
 	uv pip install -e ".[dev]"
 	@echo "🔧 Installing pre-commit hooks..."
 	uv run pre-commit install
+	uv run pre-commit install --hook-type commit-msg
 	@echo "🧪 Running initial tests..."
 	$(MAKE) test
 	@echo "✅ Development environment ready!"

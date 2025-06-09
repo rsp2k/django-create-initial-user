@@ -424,6 +424,9 @@ uv venv                    # Creates .venv virtual environment
 uv pip install -e ".[dev]" # Install with dev dependencies
 uv run pre-commit install  # Install git hooks
 
+# Option 3: Complete pre-commit setup with validation
+python setup-precommit.py  # Interactive setup and validation
+
 # Run tests and quality checks
 make test                  # Or: python dev-test.py
 make lint                  # Or: uv run pytest tests/
