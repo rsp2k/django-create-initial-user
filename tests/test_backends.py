@@ -276,3 +276,58 @@ class CreateInitialSuperUserBackendTests(TestCase):
 
         # Second authentication should fail (no matching user)
         self.assertIsNone(user2)
+
+    @override_settings(DEBUG=True)
+    def test_authenticate_with_email_only_no_username(self):
+        """Test authentication with email only (empty username)."""
+        # Ensure no superusers exist
+        self.assertFalse(self.User.objects.filter(is_superuser=True).exists())
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            # Authenticate with empty username but email in kwargs
+            authenticated_user = authenticate(
+                username="",  # Empty username
+                password=self.test_password,
+                email=self.test_email,  # Email provided in kwargs
+                backend="create_initial_superuser.backends.CreateInitialSuperUserBackend",
+            )
+
+        # Check that user was created with email as username
+        self.assertIsNotNone(authenticated_user)
+        self.assertEqual(authenticated_user.username, self.test_email)
+        self.assertEqual(authenticated_user.email, self.test_email)
+        self.assertTrue(authenticated_user.is_superuser)
+        self.assertTrue(authenticated_user.is_staff)
+        self.assertTrue(authenticated_user.check_password(self.test_password))
+
+        # Check that warning was issued
+        self.assertEqual(len(warning_list), 1)
+        self.assertIn("No superusers exist", str(warning_list[0].message))
+        self.assertIn(self.test_email, str(warning_list[0].message))
+
+    @override_settings(DEBUG=True)
+    def test_authenticate_with_email_only_none_username(self):
+        """Test authentication with email only (None username)."""
+        # Ensure no superusers exist
+        self.assertFalse(self.User.objects.filter(is_superuser=True).exists())
+
+        with warnings.catch_warnings(record=True) as warning_list:
+            warnings.simplefilter("always")
+
+            # Authenticate with None username but email in kwargs
+            authenticated_user = authenticate(
+                username=None,  # None username
+                password=self.test_password,
+                email=self.test_email,  # Email provided in kwargs
+                backend="create_initial_superuser.backends.CreateInitialSuperUserBackend",
+            )
+
+        # Check that user was created with email as username
+        self.assertIsNotNone(authenticated_user)
+        self.assertEqual(authenticated_user.username, self.test_email)
+        self.assertEqual(authenticated_user.email, self.test_email)
+        self.assertTrue(authenticated_user.is_superuser)
+        self.assertTrue(authenticated_user.is_staff)
+        self.assertTrue(authenticated_user.check_password(self.test_password))

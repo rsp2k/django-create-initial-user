@@ -39,14 +39,21 @@ class CreateInitialSuperUserBackend(ModelBackend):
 
         Args:
             request: The HTTP request object
-            username: Username
+            username: Username (can be empty for email-only authentication)
             password: Password
-            **kwargs: Additional keyword arguments
+            **kwargs: Additional keyword arguments (may include 'email')
 
         Returns:
             User object if authentication successful, None otherwise
         """
+        # Get email from kwargs if provided (for email-only authentication)
+        email = kwargs.get("email", "")
 
+        # If username is empty but email is provided, use email as username
+        if not username and email:
+            username = email
+
+        # Check if we have valid credentials
         if not username or not password:
             return None
 
